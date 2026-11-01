@@ -31,16 +31,14 @@ ROS 2とIgnition Gazeboを使用し、AI（PyTorchによる画像テンソル処
    ign gazebo world.sdf
 
 2. ROS 2 - Gazebo ブリッジの起動 (必要な場合)
-
 カメラ画像や速度指令を通信するため、別ターミナルでブリッジを起動します。
+ ```bash
+ ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
 
-Bash
-ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
-AIパトロールノードの実行
+3.AIパトロールノードの実行
 さらに別ターミナルを開き、制御スクリプトを実行します。
-
-Bash
-python3 ai_patrol.py   
+ ```bash
+ python3 ai_patrol.py   
 
 3. AIパトロールノードの実行
 Bash
