@@ -25,19 +25,26 @@ ROS 2とIgnition Gazeboを使用し、AI（PyTorchによる画像テンソル処
 4. **ESCAPE (離脱)**: 旋回後、AI検知を一時的に無視して一定時間強制的に直進し、壁から確実に距離を取ってから `PATROL` へ戻る。
 
 ## 実行方法 (How to Run)
-1. **Gazeboの起動**
-   ターミナルを開き、SDFファイルのあるディレクトリで以下を実行します。
-   ```bash
-   ign gazebo world.sdf
 
-2. ROS 2 - Gazebo ブリッジの起動 (必要な場合)
+**1. Gazeboの起動**
+ターミナルを開き、SDFファイルのあるディレクトリで以下を実行します。
+
+```bash
+ign gazebo world.sdf
+```
+
+※再生ボタン（▶）を押してシミュレーションを開始してください。
+
+**2. ROS 2 - Gazebo ブリッジの起動 (必要な場合)**
 カメラ画像や速度指令を通信するため、別ターミナルでブリッジを起動します。
- ```bash
- ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
 
-3. AIパトロールノードの実行
+```bash
+ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
+```
+
+**3. AIパトロールノードの実行**
 さらに別ターミナルを開き、制御スクリプトを実行します。
- ```bash
- python3 ai_patrol.py   
 
-
+```bash
+python3 ai_patrol.py
+```
