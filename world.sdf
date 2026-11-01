@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <world name="robot_world">
+    <!-- 物理演算と描画用の必須プラグイン -->
+    <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics"></plugin>
+    <plugin filename="libignition-gazebo-scene-broadcaster-system.so" name="ignition::gazebo::systems::SceneBroadcaster"></plugin>
+    <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- 光源 -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- 地面のモデル -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 東西南北の4つの壁（隙間なしの完全な四角形コース） -->
+    <!-- 1. 北の壁（前方） -->
+    <model name="wall_north">
+      <pose>5.0 0 0.5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>0.2 10.0 1.0</size></box></geometry><material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material></visual>
+        <collision name="collision"><geometry><box><size>0.2 10.0 1.0</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- 2. 西の壁（左方） -->
+    <model name="wall_west">
+      <pose>0 5.0 0.5 0 0 1.5708</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>0.2 10.2 1.0</size></box></geometry><material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material></visual>
+        <collision name="collision"><geometry><box><size>0.2 10.2 1.0</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- 3. 南の壁（後方） -->
+    <model name="wall_south">
+      <pose>-5.0 0 0.5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>0.2 10.0 1.0</size></box></geometry><material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material></visual>
+        <collision name="collision"><geometry><box><size>0.2 10.0 1.0</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- 4. 東の壁（右方） -->
+    <model name="wall_east">
+      <pose>0 -5.0 0.5 0 0 1.5708</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>0.2 10.2 1.0</size></box></geometry><material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material></visual>
+        <collision name="collision"><geometry><box><size>0.2 10.2 1.0</size></box></geometry></collision>
+      </link>
+    </model>
+
+    <!-- キーボード操作用プラグイン -->
+    <plugin filename="libignition-gazebo-triggered-publisher-system.so" name="ignition::gazebo::systems::TriggeredPublisher">
+      <input type="ignition.msgs.Int32" topic="/keyboard/keypress"><match field="data">16777235</match></input>
+      <output type="ignition.msgs.Twist" topic="/model/my_robot/cmd_vel">linear: {x: 0.5}, angular: {z: 0.0}</output>
+    </plugin>
+
+    <!-- ロボット本体のモデル -->
+    <model name="my_robot">
+      <pose>0 0 0.05 0 0 0</pose>
+      <plugin filename="libignition-gazebo-joint-state-publisher-system.so" name="ignition::gazebo::systems::JointStatePublisher"/>
+
+      <link name="base_link">
+        <inertial>
+          <mass>1.0</mass>
+          <inertia><ixx>0.01</ixx><iyy>0.01</iyy><izz>0.01</izz></inertia>
+        </inertial>
+        <visual name="base_visual">
+          <pose>0 0 0.04 0 0 0</pose>
+          <geometry><box><size>0.2 0.15 0.05</size></box></geometry>
+          <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse></material>
+        </visual>
+        <collision name="base_collision">
+          <pose>0 0 0.04 0 0 0</pose>
+          <geometry><box><size>0.2 0.15 0.05</size></box></geometry>
+        </collision>
+
+        <!-- カメラセンサー -->
+        <sensor name="inspection_camera" type="camera">
+          <pose>0.1 0 0.1 0 0 0</pose>
+          <always_on>1</always_on>
+          <update_rate>10.0</update_rate>
+          <camera>
+            <horizontal_fov>1.089</horizontal_fov>
+            <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+            <clip><near>0.1</near><far>100</far></clip>
+          </camera>
+          <topic>/camera/image_raw</topic>
+        </sensor>
+      </link>
+
+      <!-- 車輪・キャスター等の定義 -->
+      <link name="wheel_left_link">
+        <pose>0.0 0.095 0.023 -1.57 0 0</pose>
+        <inertial><mass>0.1</mass><inertia><ixx>1.11e-05</ixx><iyy>1.11e-05</iyy><izz>2.07e-05</izz></inertia></inertial>
+        <visual name="wheel_left_visual"><geometry><cylinder><radius>0.033</radius><length>0.018</length></cylinder></geometry><material><ambient>1 0 0 1</ambient></material></visual>
+        <collision name="wheel_left_collision"><geometry><cylinder><radius>0.033</radius><length>0.018</length></cylinder></geometry></collision>
+      </link>
+      <joint name="wheel_left_joint" type="revolute">
+        <parent>base_link</parent><child>wheel_left_link</child><axis><xyz>0 0 1</xyz></axis>
+      </joint>
+
+      <link name="wheel_right_link">
+        <pose>0.0 -0.095 0.023 -1.57 0 0</pose>
+        <inertial><mass>0.1</mass><inertia><ixx>1.11e-05</ixx><iyy>1.11e-05</iyy><izz>2.07e-05</izz></inertia></inertial>
+        <visual name="wheel_right_visual"><geometry><cylinder><radius>0.033</radius><length>0.018</length></cylinder></geometry><material><ambient>1 0 0 1</ambient></material></visual>
+        <collision name="wheel_right_collision"><geometry><cylinder><radius>0.033</radius><length>0.018</length></cylinder></geometry></collision>
+      </link>
+      <joint name="wheel_right_joint" type="revolute">
+        <parent>base_link</parent><child>wheel_right_link</child><axis><xyz>0 0 1</xyz></axis>
+      </joint>
+
+      <link name='caster_back_right_link'>
+        <pose>0.15 -0.05 -0.004 -1.57 0 0</pose>
+        <inertial><mass>0.001</mass><inertia><ixx>1e-05</ixx><iyy>1e-05</iyy><izz>1e-05</izz></inertia></inertial>
+        <visual name='caster_back_right_visual'><geometry><sphere><radius>0.005</radius></sphere></geometry><material><ambient>0 1 0 1</ambient></material></visual>
+        <collision name='collision'><geometry><sphere><radius>0.005</radius></sphere></geometry></collision>
+      </link>
+      <joint name='caster_back_right_joint' type='ball'>
+        <parent>base_link</parent><child>caster_back_right_link</child>
+      </joint>
+
+      <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
+        <left_joint>wheel_left_joint</left_joint>
+        <right_joint>wheel_right_joint</right_joint>
+        <wheel_separation>0.19</wheel_separation>
+        <wheel_radius>0.033</wheel_radius>
+        <topic>/model/my_robot/cmd_vel</topic>
+      </plugin>
+    </model>
+  </world>
+</sdf>
