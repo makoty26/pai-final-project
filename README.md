@@ -35,12 +35,9 @@ ROS 2とIgnition Gazeboを使用し、AI（PyTorchによる画像テンソル処
  ```bash
  ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
 
-3.AIパトロールノードの実行
+3. AIパトロールノードの実行
 さらに別ターミナルを開き、制御スクリプトを実行します。
  ```bash
  python3 ai_patrol.py   
 
-3. AIパトロールノードの実行
-Bash
-python3 ai_patrol.py
-さらに別ターミナルを開き、制御スクリプトを実行します。
+
