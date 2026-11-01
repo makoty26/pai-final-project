@@ -22,4 +22,21 @@ ROS 2とIgnition Gazeboを使用し、AI（PyTorchによる画像テンソル処
 1. **PATROL (パトロール)**: 通常速度で直進。カメラ画像の赤色ピクセル数が閾値（45,000,000）を超えたら `STOP` へ遷移。
 2. **STOP (停止待機)**: 壁を検知後、一定フレーム完全に停止して挙動を安定させる。
 3. **TURN (旋回)**: その場で左に約90度旋回する。
-4. **ESCAPE (離脱)**: 旋回後、AI検知を一時的に無視して一定時間強制的に直進し、壁から確実に
+4. **ESCAPE (離脱)**: 旋回後、AI検知を一時的に無視して一定時間強制的に直進し、壁から確実に距離を取ってから `PATROL` へ戻る。
+
+## 実行方法 (How to Run)
+1. **Gazeboの起動**
+   ターミナルを開き、SDFファイルのあるディレクトリで以下を実行します。
+   ```bash
+   ign gazebo world.sdf
+
+ROS 2 - Gazebo ブリッジの起動 (必要な場合)
+カメラ画像や速度指令を通信するため、別ターミナルでブリッジを起動します。
+
+Bash
+ros2 run ros_gz_bridge parameter_bridge /camera/image_raw@sensor_msgs/msg/Image@ignition.msgs.Image /model/my_robot/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
+AIパトロールノードの実行
+さらに別ターミナルを開き、制御スクリプトを実行します。
+
+Bash
+python3 ai_patrol.py   
